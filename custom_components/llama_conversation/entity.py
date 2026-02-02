@@ -294,8 +294,12 @@ class LocalLLMClient:
                             # try multiple dict key names
                             function_content = raw_tool_call.get("function") or raw_tool_call.get("function_call") or raw_tool_call.get("tool")
                             if not function_content:
-                                _LOGGER.warning("Received tool call dict without 'function', 'function_call' or 'tool' key: %s", raw_tool_call)
-                                continue
+                                # Check if the dict itself is the function content (has 'name' and 'arguments')
+                                if "name" in raw_tool_call:
+                                    function_content = raw_tool_call
+                                else:
+                                    _LOGGER.warning("Received tool call dict without 'function', 'function_call' or 'tool' key: %s", raw_tool_call)
+                                    continue
                             tool_call, to_say = parse_raw_tool_call(function_content, agent_id)
 
                         if tool_call:
@@ -361,8 +365,12 @@ class LocalLLMClient:
                         # try multiple dict key names
                         function_content = raw_tool_call.get("function") or raw_tool_call.get("function_call") or raw_tool_call.get("tool")
                         if not function_content:
-                            _LOGGER.warning("Received tool call dict without 'function', 'function_call' or 'tool' key: %s", raw_tool_call)
-                            continue
+                            # Check if the dict itself is the function content (has 'name' and 'arguments')
+                            if "name" in raw_tool_call:
+                                function_content = raw_tool_call
+                            else:
+                                _LOGGER.warning("Received tool call dict without 'function', 'function_call' or 'tool' key: %s", raw_tool_call)
+                                continue
                         tool_call, to_say = parse_raw_tool_call(function_content, agent_id)
                     if tool_call:
                         _LOGGER.debug("Tool call parsed: %s", tool_call)
