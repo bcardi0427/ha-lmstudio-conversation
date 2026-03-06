@@ -2,10 +2,13 @@ This project's code and synthetic dataset are licensed under the MIT License. Th
 
 Portions of this project are re-used from the Stanford Alpaca codebase and dataset. Its code is distributed under the Apache 2.0 License and the Dataset is licensed under Creative Commons NonCommercial (CC BY-NC 4.0). Both licenses are reproduced below to comply with their requirements.
 
+This project is a fork of the `home-llm` repository created by Alex O'Connell. 
+
 ---
 The MIT License
 
 Copyright 2024 Alex O'Connell
+Copyright 2025 LM Studio Integration Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
