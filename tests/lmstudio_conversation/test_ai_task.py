@@ -8,14 +8,14 @@ import voluptuous as vol
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import llm
 
-from custom_components.llama_conversation.ai_task import (
+from custom_components.lmstudio_conversation.ai_task import (
     LocalLLMTaskEntity,
     ResultExtractionMethod,
 )
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.const import (
     CONF_AI_TASK_EXTRACTION_METHOD,
 )
-from custom_components.llama_conversation.entity import TextGenerationResult
+from custom_components.lmstudio_conversation.entity import TextGenerationResult
 
 
 class DummyGenTask:

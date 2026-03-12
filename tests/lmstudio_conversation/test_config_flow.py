@@ -6,8 +6,8 @@ from homeassistant.const import CONF_LLM_HASS_API
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import llm
 
-from custom_components.llama_conversation.config_flow import local_llama_config_option_schema
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.config_flow import local_llama_config_option_schema
+from custom_components.lmstudio_conversation.const import (
     BACKEND_TYPE_LLAMA_CPP,
     BACKEND_TYPE_TEXT_GEN_WEBUI,
     BACKEND_TYPE_GENERIC_OPENAI,
@@ -191,7 +191,7 @@ def test_schema_ollama_defaults_and_overrides(hass: HomeAssistant):
 
 def test_schema_includes_llm_api_selector(monkeypatch, hass: HomeAssistant):
     monkeypatch.setattr(
-        "custom_components.llama_conversation.config_flow.llm.async_get_apis",
+        "custom_components.lmstudio_conversation.config_flow.llm.async_get_apis",
         lambda _hass: [type("API", (), {"id": "dummy", "name": "Dummy API", "tools": []})()],
     )
     schema = _schema(hass, BACKEND_TYPE_LLAMA_CPP)

@@ -6,8 +6,8 @@ from contextlib import contextmanager
 from homeassistant.components.conversation import ConversationInput, SystemContent, AssistantContent
 from homeassistant.const import MATCH_ALL
 
-from custom_components.llama_conversation.conversation import LocalLLMAgent
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.conversation import LocalLLMAgent
+from custom_components.lmstudio_conversation.const import (
     CONF_CHAT_MODEL,
     CONF_PROMPT,
     DEFAULT_PROMPT,
@@ -87,11 +87,11 @@ async def test_async_process_generates_response(monkeypatch, hass):
         yield FakeChatLog()
 
     monkeypatch.setattr(
-        "custom_components.llama_conversation.conversation.chat_session.async_get_chat_session",
+        "custom_components.lmstudio_conversation.conversation.chat_session.async_get_chat_session",
         fake_chat_session,
     )
     monkeypatch.setattr(
-        "custom_components.llama_conversation.conversation.conversation.async_get_chat_log",
+        "custom_components.lmstudio_conversation.conversation.conversation.async_get_chat_log",
         fake_chat_log,
     )
 

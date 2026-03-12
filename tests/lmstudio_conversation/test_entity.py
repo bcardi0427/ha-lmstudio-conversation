@@ -5,8 +5,8 @@ import json
 import pytest
 from json import JSONDecodeError
 
-from custom_components.llama_conversation.entity import LocalLLMClient
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.entity import LocalLLMClient
+from custom_components.lmstudio_conversation.const import (
     CONF_EXTRA_ATTRIBUTES_TO_EXPOSE,
     CONF_USE_IN_CONTEXT_LEARNING_EXAMPLES,
     DEFAULT_TOOL_CALL_PREFIX,
@@ -130,7 +130,7 @@ async def test_async_get_exposed_entities_respects_exposure(monkeypatch, client,
     hass.states.async_set("switch.hidden", "off", {"friendly_name": "Hidden"})
 
     monkeypatch.setattr(
-        "custom_components.llama_conversation.entity.async_should_expose",
+        "custom_components.lmstudio_conversation.entity.async_should_expose",
         lambda _hass, _domain, entity_id: not entity_id.endswith("hidden"),
     )
 
@@ -146,7 +146,7 @@ async def test_async_get_exposed_entities_respects_exposure(monkeypatch, client,
 async def test_generate_system_prompt_renders(monkeypatch, client, hass):
     hass.states.async_set("light.kitchen", "on", {"friendly_name": "Kitchen"})
     monkeypatch.setattr(
-        "custom_components.llama_conversation.entity.async_should_expose",
+        "custom_components.lmstudio_conversation.entity.async_should_expose",
         lambda _hass, _domain, _entity_id: True,
     )
 

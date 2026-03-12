@@ -6,8 +6,8 @@ from homeassistant.const import CONF_LLM_HASS_API, CONF_HOST, CONF_PORT, CONF_SS
 from homeassistant.config_entries import ConfigSubentry
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.llama_conversation import async_migrate_entry
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation import async_migrate_entry
+from custom_components.lmstudio_conversation.const import (
     BACKEND_TYPE_LLAMA_CPP,
     BACKEND_TYPE_GENERIC_OPENAI,
     BACKEND_TYPE_LLAMA_CPP_SERVER,
@@ -108,7 +108,7 @@ async def test_migrate_v3_minor0_downloads_model(monkeypatch, hass):
         update_calls.append(kwargs)
 
     monkeypatch.setattr(
-        "custom_components.llama_conversation.download_model_from_hf", lambda *_args, **_kw: "file.gguf"
+        "custom_components.lmstudio_conversation.download_model_from_hf", lambda *_args, **_kw: "file.gguf"
     )
     monkeypatch.setattr(hass.config_entries, "async_update_subentry", fake_update_subentry)
     monkeypatch.setattr(hass.config_entries, "async_update_entry", fake_update_entry)

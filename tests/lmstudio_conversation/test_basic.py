@@ -8,10 +8,10 @@ import pytest
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SSL
 
-from custom_components.llama_conversation.backends.llamacpp import snapshot_settings
-from custom_components.llama_conversation.backends.ollama import OllamaAPIClient, _normalize_path
-from custom_components.llama_conversation.backends.generic_openai import GenericOpenAIAPIClient
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.backends.llamacpp import snapshot_settings
+from custom_components.lmstudio_conversation.backends.ollama import OllamaAPIClient, _normalize_path
+from custom_components.lmstudio_conversation.backends.generic_openai import GenericOpenAIAPIClient
+from custom_components.lmstudio_conversation.const import (
     CONF_CHAT_MODEL,
     CONF_CONTEXT_LENGTH,
     CONF_LLAMACPP_BATCH_SIZE,
