@@ -184,16 +184,30 @@ class GenericOpenAIAPIClient(LocalLLMClient):
                     response.raise_for_status()
                     async for line_bytes in response.content:
                         raw_line = line_bytes.decode("utf-8").strip()
+                        if not raw_line or raw_line.startswith(":"):
+                            continue
+                        
                         if raw_line.startswith("error: "):
                             raise Exception(f"Error from server: {raw_line}")
-                        chunk = raw_line.removeprefix("data: ")
-                        if "[DONE]" in chunk:
+                        
+                        if not raw_line.startswith("data:"):
+                            _LOGGER.debug(f"Skipping non-data line: {raw_line}")
+                            continue
+
+                        chunk = raw_line.removeprefix("data:").strip()
+                        if not chunk:
+                            continue
+
+                        if chunk == "[DONE]":
                             break
 
-                        if chunk and chunk.strip():
+                        try:
                             to_say, tool_calls = self._extract_response(json.loads(chunk))
                             if to_say or tool_calls:
                                 yield to_say, tool_calls
+                        except json.JSONDecodeError:
+                            _LOGGER.error(f"Failed to parse JSON from SSE chunk: {chunk}")
+                            continue
             except asyncio.TimeoutError as err:
                 raise HomeAssistantError("The generation request timed out! Please check your connection settings, increase the timeout in settings, or decrease the number of exposed entities.") from err
             except aiohttp.ClientError as err:
