@@ -677,6 +677,36 @@ def lm_studio_config_option_schema(
             description={"suggested_value": options.get(CONF_TOOL_RESPONSE_AS_STRING, DEFAULT_TOOL_RESPONSE_AS_STRING)},
             default=DEFAULT_TOOL_RESPONSE_AS_STRING
         ): bool,
+        vol.Required(
+            CONF_MAX_TOKENS,
+            description={"suggested_value": options.get(CONF_MAX_TOKENS)},
+            default=DEFAULT_MAX_TOKENS,
+        ): NumberSelector(NumberSelectorConfig(min=1, max=8192, step=1)),
+        vol.Required(
+            CONF_TOP_K,
+            description={"suggested_value": options.get(CONF_TOP_K)},
+            default=DEFAULT_TOP_K,
+        ): NumberSelector(NumberSelectorConfig(min=1, max=256, step=1)),
+        vol.Required(
+            CONF_TOP_P,
+            description={"suggested_value": options.get(CONF_TOP_P)},
+            default=DEFAULT_TOP_P,
+        ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
+        vol.Required(
+            CONF_MIN_P,
+            description={"suggested_value": options.get(CONF_MIN_P)},
+            default=DEFAULT_MIN_P,
+        ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
+        vol.Required(
+            CONF_TYPICAL_P,
+            description={"suggested_value": options.get(CONF_TYPICAL_P)},
+            default=DEFAULT_TYPICAL_P,
+        ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
+        vol.Required(
+            CONF_CONTEXT_LENGTH,
+            description={"suggested_value": options.get(CONF_CONTEXT_LENGTH)},
+            default=DEFAULT_CONTEXT_LENGTH,
+        ): NumberSelector(NumberSelectorConfig(min=512, max=1_048_576, step=512)),
     }
 
 
@@ -727,7 +757,7 @@ def lm_studio_config_option_schema(
                 CONF_LLM_HASS_API,
                 description={"suggested_value": options.get(CONF_LLM_HASS_API)},
                 default=None,
-            ): SelectSelector(SelectSelectorConfig(options=apis, multiple=True)),
+            ): SelectSelector(SelectSelectorConfig(options=apis, multiple=False)),
             vol.Optional(
                 CONF_REMEMBER_CONVERSATION,
                 description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION, DEFAULT_REMEMBER_CONVERSATION)},
@@ -791,38 +821,7 @@ def lm_studio_config_option_schema(
                     default=DEFAULT_PROMPT_CACHING_INTERVAL,
                 ): NumberSelector(NumberSelectorConfig(min=1, max=60, step=1))
             })
-        advanced_result.update({
-            vol.Required(
-                CONF_MAX_TOKENS,
-                description={"suggested_value": options.get(CONF_MAX_TOKENS)},
-                default=DEFAULT_MAX_TOKENS,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=8192, step=1)),
-            vol.Required(
-                CONF_TOP_K,
-                description={"suggested_value": options.get(CONF_TOP_K)},
-                default=DEFAULT_TOP_K,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=256, step=1)),
-            vol.Required(
-                CONF_TOP_P,
-                description={"suggested_value": options.get(CONF_TOP_P)},
-                default=DEFAULT_TOP_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
-            vol.Required(
-                CONF_MIN_P,
-                description={"suggested_value": options.get(CONF_MIN_P)},
-                default=DEFAULT_MIN_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
-            vol.Required(
-                CONF_TYPICAL_P,
-                description={"suggested_value": options.get(CONF_TYPICAL_P)},
-                default=DEFAULT_TYPICAL_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
             # TODO: add rope_scaling_type
-            vol.Required(
-                CONF_CONTEXT_LENGTH,
-                description={"suggested_value": options.get(CONF_CONTEXT_LENGTH)},
-                default=DEFAULT_CONTEXT_LENGTH,
-            ): NumberSelector(NumberSelectorConfig(min=512, max=1_048_576, step=512)),
             vol.Required(
                 CONF_LLAMACPP_BATCH_SIZE,
                 description={"suggested_value": options.get(CONF_LLAMACPP_BATCH_SIZE)},
