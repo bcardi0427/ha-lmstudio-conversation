@@ -811,80 +811,38 @@ def lm_studio_config_option_schema(
         if subentry_type == conversation.DOMAIN:
             advanced_result.update({
                 vol.Required(
-                    CONF_PROMPT_CACHING_ENABLED,
-                    description={"suggested_value": options.get(CONF_PROMPT_CACHING_ENABLED)},
-                    default=DEFAULT_PROMPT_CACHING_ENABLED,
+                    CONF_LLAMACPP_THREAD_COUNT,
+                    description={"suggested_value": options.get(CONF_LLAMACPP_THREAD_COUNT)},
+                    default=DEFAULT_LLAMACPP_THREAD_COUNT,
+                ): NumberSelector(NumberSelectorConfig(min=1, max=((os.cpu_count() or 1) * 2), step=1)),
+                vol.Required(
+                    CONF_LLAMACPP_BATCH_THREAD_COUNT,
+                    description={"suggested_value": options.get(CONF_LLAMACPP_BATCH_THREAD_COUNT)},
+                    default=DEFAULT_LLAMACPP_BATCH_THREAD_COUNT,
+                ): NumberSelector(NumberSelectorConfig(min=1, max=((os.cpu_count() or 1) * 2), step=1)),
+                vol.Required(
+                    CONF_LLAMACPP_ENABLE_FLASH_ATTENTION,
+                    description={"suggested_value": options.get(CONF_LLAMACPP_ENABLE_FLASH_ATTENTION)},
+                    default=DEFAULT_LLAMACPP_ENABLE_FLASH_ATTENTION,
                 ): BooleanSelector(BooleanSelectorConfig()),
                 vol.Required(
-                    CONF_PROMPT_CACHING_INTERVAL,
-                    description={"suggested_value": options.get(CONF_PROMPT_CACHING_INTERVAL)},
-                    default=DEFAULT_PROMPT_CACHING_INTERVAL,
-                ): NumberSelector(NumberSelectorConfig(min=1, max=60, step=1))
+                    CONF_LLAMACPP_CACHE_SIZE_MB,
+                    description={"suggested_value": options.get(CONF_LLAMACPP_CACHE_SIZE_MB)},
+                    default=DEFAULT_LLAMACPP_CACHE_SIZE_MB,
+                ): NumberSelector(NumberSelectorConfig(min=0, max=1024, step=1)),
+                vol.Required(
+                    CONF_USE_GBNF_GRAMMAR,
+                    description={"suggested_value": options.get(CONF_USE_GBNF_GRAMMAR)},
+                    default=DEFAULT_USE_GBNF_GRAMMAR,
+                ): BooleanSelector(BooleanSelectorConfig()),
+                vol.Required(
+                    CONF_GBNF_GRAMMAR_FILE,
+                    description={"suggested_value": options.get(CONF_GBNF_GRAMMAR_FILE)},
+                    default=DEFAULT_GBNF_GRAMMAR_FILE,
+                ): str
             })
-            # TODO: add rope_scaling_type
-            vol.Required(
-                CONF_LLAMACPP_BATCH_SIZE,
-                description={"suggested_value": options.get(CONF_LLAMACPP_BATCH_SIZE)},
-                default=DEFAULT_LLAMACPP_BATCH_SIZE,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=8192, step=1)),
-            vol.Required(
-                CONF_LLAMACPP_THREAD_COUNT,
-                description={"suggested_value": options.get(CONF_LLAMACPP_THREAD_COUNT)},
-                default=DEFAULT_LLAMACPP_THREAD_COUNT,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=((os.cpu_count() or 1) * 2), step=1)),
-            vol.Required(
-                CONF_LLAMACPP_BATCH_THREAD_COUNT,
-                description={"suggested_value": options.get(CONF_LLAMACPP_BATCH_THREAD_COUNT)},
-                default=DEFAULT_LLAMACPP_BATCH_THREAD_COUNT,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=((os.cpu_count() or 1) * 2), step=1)),
-            vol.Required(
-                CONF_LLAMACPP_ENABLE_FLASH_ATTENTION,
-                description={"suggested_value": options.get(CONF_LLAMACPP_ENABLE_FLASH_ATTENTION)},
-                default=DEFAULT_LLAMACPP_ENABLE_FLASH_ATTENTION,
-            ): BooleanSelector(BooleanSelectorConfig()),
-            vol.Required(
-                CONF_LLAMACPP_CACHE_SIZE_MB,
-                description={"suggested_value": options.get(CONF_LLAMACPP_CACHE_SIZE_MB)},
-                default=DEFAULT_LLAMACPP_CACHE_SIZE_MB,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1024, step=1)),
-            vol.Required(
-                CONF_USE_GBNF_GRAMMAR,
-                description={"suggested_value": options.get(CONF_USE_GBNF_GRAMMAR)},
-                default=DEFAULT_USE_GBNF_GRAMMAR,
-            ): BooleanSelector(BooleanSelectorConfig()),
-            vol.Required(
-                CONF_GBNF_GRAMMAR_FILE,
-                description={"suggested_value": options.get(CONF_GBNF_GRAMMAR_FILE)},
-                default=DEFAULT_GBNF_GRAMMAR_FILE,
-            ): str
-        })
     elif backend_type == BACKEND_TYPE_TEXT_GEN_WEBUI:
         advanced_result.update({
-            vol.Required(
-                CONF_CONTEXT_LENGTH,
-                description={"suggested_value": options.get(CONF_CONTEXT_LENGTH)},
-                default=DEFAULT_CONTEXT_LENGTH,
-            ): NumberSelector(NumberSelectorConfig(min=512, max=1_048_576, step=512)),
-            vol.Required(
-                CONF_TOP_K,
-                description={"suggested_value": options.get(CONF_TOP_K)},
-                default=DEFAULT_TOP_K,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=256, step=1)),
-            vol.Required(
-                CONF_TOP_P,
-                description={"suggested_value": options.get(CONF_TOP_P)},
-                default=DEFAULT_TOP_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
-            vol.Required(
-                CONF_MIN_P,
-                description={"suggested_value": options.get(CONF_MIN_P)},
-                default=DEFAULT_MIN_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
-            vol.Required(
-                CONF_TYPICAL_P,
-                description={"suggested_value": options.get(CONF_TYPICAL_P)},
-                default=DEFAULT_TYPICAL_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
             vol.Required(
                 CONF_REQUEST_TIMEOUT,
                 description={"suggested_value": options.get(CONF_REQUEST_TIMEOUT)},
@@ -908,11 +866,6 @@ def lm_studio_config_option_schema(
     elif backend_type in BACKEND_TYPE_GENERIC_OPENAI:
         advanced_result.update({
             vol.Required(
-                CONF_TOP_P,
-                description={"suggested_value": options.get(CONF_TOP_P)},
-                default=DEFAULT_TOP_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
-            vol.Required(
                 CONF_REQUEST_TIMEOUT,
                 description={"suggested_value": options.get(CONF_REQUEST_TIMEOUT)},
                 default=DEFAULT_REQUEST_TIMEOUT,
@@ -926,21 +879,6 @@ def lm_studio_config_option_schema(
 
         advanced_result.update({
             vol.Required(
-                CONF_REMEMBER_CONVERSATION_TIME_MINUTES,
-                description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION_TIME_MINUTES)},
-                default=DEFAULT_TOP_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=180, step=0.5, unit_of_measurement=UnitOfTime.MINUTES, mode=NumberSelectorMode.BOX)),
-            vol.Required(
-                CONF_TEMPERATURE,
-                description={"suggested_value": options.get(CONF_TEMPERATURE)},
-                default=DEFAULT_TEMPERATURE,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=3, step=0.05)),
-            vol.Required(
-                CONF_TOP_P,
-                description={"suggested_value": options.get(CONF_TOP_P)},
-                default=DEFAULT_TOP_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
-            vol.Required(
                 CONF_REQUEST_TIMEOUT,
                 description={"suggested_value": options.get(CONF_REQUEST_TIMEOUT)},
                 default=DEFAULT_REQUEST_TIMEOUT,
@@ -948,21 +886,6 @@ def lm_studio_config_option_schema(
         })
     elif backend_type == BACKEND_TYPE_LLAMA_CPP_SERVER:
         advanced_result.update({
-                vol.Required(
-                CONF_MAX_TOKENS,
-                description={"suggested_value": options.get(CONF_MAX_TOKENS)},
-                default=DEFAULT_MAX_TOKENS,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=8192, step=1)),
-            vol.Required(
-                CONF_TOP_K,
-                description={"suggested_value": options.get(CONF_TOP_K)},
-                default=DEFAULT_TOP_K,
-            ): NumberSelector(NumberSelectorConfig(min=1, max=256, step=1)),
-            vol.Required(
-                CONF_TOP_P,
-                description={"suggested_value": options.get(CONF_TOP_P)},
-                default=DEFAULT_TOP_P,
-            ): NumberSelector(NumberSelectorConfig(min=0, max=1, step=0.05)),
             vol.Required(
                 CONF_USE_GBNF_GRAMMAR,
                 description={"suggested_value": options.get(CONF_USE_GBNF_GRAMMAR)},
