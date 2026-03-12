@@ -1,6 +1,6 @@
 {
   "domain": "llama_conversation",
-  "name": "Local LLMs",
+  "name": "ha-lmstudio-conversation",
   "version": "0.4.6",
   "codeowners": ["@acon96"],
   "config_flow": true,
