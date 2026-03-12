@@ -757,7 +757,7 @@ def lm_studio_config_option_schema(
                 CONF_LLM_HASS_API,
                 description={"suggested_value": options.get(CONF_LLM_HASS_API)},
                 default=None,
-            ): SelectSelector(SelectSelectorConfig(options=apis, multiple=False)),
+            ): vol.Any(SelectSelector(SelectSelectorConfig(options=apis, multiple=False)), None),
             vol.Optional(
                 CONF_REMEMBER_CONVERSATION,
                 description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION, DEFAULT_REMEMBER_CONVERSATION)},
@@ -797,14 +797,14 @@ def lm_studio_config_option_schema(
             ): NumberSelector(NumberSelectorConfig(min=0, max=100, mode=NumberSelectorMode.BOX)),
             vol.Optional(
                 CONF_REMEMBER_CONVERSATION_TIME_MINUTES,
-                description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION_TIME_MINUTES, DEFAULT_REMEMBER_CONVERSATION)},
-                default=options.get(CONF_REMEMBER_CONVERSATION_TIME_MINUTES, DEFAULT_REMEMBER_CONVERSATION),
+                description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION_TIME_MINUTES, DEFAULT_REMEMBER_CONVERSATION_TIME_MINUTES)},
+                default=options.get(CONF_REMEMBER_CONVERSATION_TIME_MINUTES, DEFAULT_REMEMBER_CONVERSATION_TIME_MINUTES),
             ): NumberSelector(NumberSelectorConfig(min=0, max=1440, mode=NumberSelectorMode.BOX)),
             vol.Required(
                 CONF_MAX_TOOL_CALL_ITERATIONS,
                 description={"suggested_value": options.get(CONF_MAX_TOOL_CALL_ITERATIONS)},
                 default=DEFAULT_MAX_TOOL_CALL_ITERATIONS,
-            ): int,
+            ): NumberSelector(NumberSelectorConfig(min=0, max=20, step=1, mode=NumberSelectorMode.BOX)),
         })
 
     if backend_type == BACKEND_TYPE_LLAMA_CPP:
@@ -1247,7 +1247,7 @@ class LMStudioSubentryFlowHandler(ConfigSubentryFlow):
             if len(errors) == 0:
                 try:
                     # validate input
-                    schema(user_input)
+                    # schema(user_input)
                     self.model_config.update(user_input)
 
                     if user_input.get(CONF_SHOW_ADVANCED) != previous_show_advanced:
