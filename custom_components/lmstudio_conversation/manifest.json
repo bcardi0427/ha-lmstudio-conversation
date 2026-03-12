@@ -1,7 +1,7 @@
 {
   "domain": "lmstudio_conversation",
   "name": "LM Studio Conversation",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "codeowners": ["@bcardi0427"],
   "config_flow": true,
   "dependencies": ["conversation", "ai_task"],

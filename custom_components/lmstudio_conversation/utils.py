@@ -1,4 +1,5 @@
 import time
+import datetime
 import os
 import re
 import ipaddress
@@ -303,6 +304,16 @@ def get_oai_formatted_tools(llm_api: llm.APIInstance, domains: list[str]) -> Lis
 
     return result
 
+def json_default(obj):
+    """Custom JSON serializer for objects not serializable by default json code."""
+    if isinstance(obj, (datetime.date, datetime.time, datetime.datetime)):
+        return obj.isoformat()
+    if isinstance(obj, set):
+        return list(obj)
+    if hasattr(obj, "as_dict"):
+        return obj.as_dict()
+    return str(obj)
+
 def get_oai_formatted_messages(
         conversation: Sequence[conversation.Content],
         *,
@@ -354,7 +365,7 @@ def get_oai_formatted_messages(
                             "type" : "function",
                             "id": t.id,
                             "function": {
-                                "arguments": cast(str, json.dumps(t.tool_args) if tool_args_to_str else t.tool_args),
+                                "arguments": cast(str, json.dumps(t.tool_args, default=json_default) if tool_args_to_str else t.tool_args),
                                 "name": t.tool_name,
                             }
                         } for t in message.tool_calls
@@ -362,7 +373,7 @@ def get_oai_formatted_messages(
                 })
         elif message.role == "tool_result":
             if tool_result_to_str:
-                content = json.dumps(message.tool_result)
+                content = json.dumps(message.tool_result, default=json_default)
             else:
                 content = {
                     "name": message.tool_name,
