@@ -127,6 +127,7 @@ class LMStudioAgent(ConversationEntity, AbstractConversationAgent, LMStudioEntit
             if remember_num_interactions and len(message_history) > (remember_num_interactions * 2) + 1:
                 new_message_history = [message_history[0]] # copy system prompt
                 new_message_history.extend(message_history[1:][-(remember_num_interactions * 2):])
+                message_history = new_message_history
 
             # re-generate prompt if necessary
             if len(message_history) == 0 or refresh_system_prompt:

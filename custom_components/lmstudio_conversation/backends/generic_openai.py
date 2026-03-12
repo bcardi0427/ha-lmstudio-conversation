@@ -221,6 +221,10 @@ class GenericOpenAIAPIClient(LMStudioClient):
         return endpoint, request_params
 
     def _extract_response(self, response_json: dict) -> Tuple[Optional[str], Optional[List[dict]]]:
+        if "error" in response_json:
+            error_msg = response_json["error"].get("message", "Unknown error from API")
+            raise HomeAssistantError(f"API Error: {error_msg}")
+
         if "choices" not in response_json or len(response_json["choices"]) == 0: # finished
             _LOGGER.warning("Response missing or empty 'choices'. Keys present: %s. Full response: %s",
                             list(response_json.keys()), response_json)
