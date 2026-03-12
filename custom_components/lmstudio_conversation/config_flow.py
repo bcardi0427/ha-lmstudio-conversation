@@ -1,4 +1,4 @@
-"""Config flow for Local LLM Conversation integration."""
+"""Config flow for LM Studio Conversation integration."""
 from __future__ import annotations
 
 from asyncio import Task
@@ -99,6 +99,7 @@ from .const import (
     CONF_LLAMACPP_BATCH_THREAD_COUNT,
     CONF_LLAMACPP_REINSTALL,
     CONF_LLAMACPP_CACHE_SIZE_MB,
+    CONF_SHOW_ADVANCED,
     DEFAULT_CHAT_MODEL,
     DEFAULT_PORT,
     DEFAULT_SSL,
@@ -159,14 +160,14 @@ from .const import (
     TEXT_GEN_WEBUI_CHAT_MODE_INSTRUCT,
     TEXT_GEN_WEBUI_CHAT_MODE_CHAT_INSTRUCT,
     DOMAIN,
-    HOME_LLM_API_ID,
+    LM_STUDIO_API_ID,
     DEFAULT_OPTIONS,
     option_overrides,
     RECOMMENDED_CHAT_MODELS,
     EMBEDDED_LLAMA_CPP_PYTHON_VERSION,
 )
 
-from . import HomeLLMAPI, LocalLLMConfigEntry, LocalLLMClient, BACKEND_TO_CLS
+from . import LMStudioAPI, LMStudioConfigEntry, LMStudioClient, BACKEND_TO_CLS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -247,7 +248,7 @@ def remote_connection_schema(backend_type: str, *, host=None, port=None, ssl=Non
     )
 
 class ConfigFlow(BaseConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Local LLM Conversation."""
+    """Handle a config flow for LM Studio Conversation."""
 
     VERSION = 3
     MINOR_VERSION = 2
@@ -277,8 +278,8 @@ class ConfigFlow(BaseConfigFlow, domain=DOMAIN):
             self.client_config = {}
 
             # make sure the API is registered
-            if not any([x.id == HOME_LLM_API_ID for x in llm.async_get_apis(self.hass)]):
-                llm.async_register_api(self.hass, HomeLLMAPI(self.hass))
+            if not any([x.id == LM_STUDIO_API_ID for x in llm.async_get_apis(self.hass)]):
+                llm.async_register_api(self.hass, LMStudioAPI(self.hass))
 
             self.internal_step = "pick_backend"
             return self.async_show_form(
@@ -440,13 +441,13 @@ class ConfigFlow(BaseConfigFlow, domain=DOMAIN):
     ) -> dict[str, type[ConfigSubentryFlow]]:
         """Return subentries supported by this integration."""
         return {
-            conversation.DOMAIN: LocalLLMSubentryFlowHandler,
-            ai_task.DOMAIN: LocalLLMSubentryFlowHandler,
+            conversation.DOMAIN: LMStudioSubentryFlowHandler,
+            ai_task.DOMAIN: LMStudioSubentryFlowHandler,
         }
 
 
 class OptionsFlow(BaseOptionsFlow):
-    """Local LLM config flow options handler."""
+    """LM Studio config flow options handler."""
 
     model_config: dict[str, Any] | None = None
     reinstall_task: Task[Any] | None = None
@@ -619,64 +620,76 @@ def build_prompt_template(selected_language: str, prompt_template_template: str)
 
     return prompt_template_template
 
-def local_llama_config_option_schema(
+def lm_studio_config_option_schema(
     hass: HomeAssistant,
     language: str,
     options: dict[str, Any],
     backend_type: str, 
     subentry_type: str,
+    show_advanced: bool = False,
 ) -> dict:
     
     result: dict = {
+        vol.Required(
+            CONF_SHOW_ADVANCED,
+            default=show_advanced,
+        ): bool,
+    }
+
+    advanced_result: dict = {
         vol.Optional(
             CONF_TEMPERATURE,
             description={"suggested_value": options.get(CONF_TEMPERATURE, DEFAULT_TEMPERATURE)},
             default=options.get(CONF_TEMPERATURE, DEFAULT_TEMPERATURE),
         ): NumberSelector(NumberSelectorConfig(min=0.0, max=2.0, step=0.05, mode=NumberSelectorMode.BOX)),
-        vol.Required(
-            CONF_THINKING_PREFIX,
-            description={"suggested_value": options.get(CONF_THINKING_PREFIX)},
-            default=DEFAULT_THINKING_PREFIX,
-        ): str,
-        vol.Required(
-            CONF_THINKING_SUFFIX,
-            description={"suggested_value": options.get(CONF_THINKING_SUFFIX)},
-            default=DEFAULT_THINKING_SUFFIX,
-        ): str,
-        vol.Required(
-            CONF_TOOL_CALL_PREFIX,
-            description={"suggested_value": options.get(CONF_TOOL_CALL_PREFIX)},
-            default=DEFAULT_TOOL_CALL_PREFIX,
-        ): str,
-        vol.Required(
-            CONF_TOOL_CALL_SUFFIX,
-            description={"suggested_value": options.get(CONF_TOOL_CALL_SUFFIX)},
-            default=DEFAULT_TOOL_CALL_SUFFIX,
-        ): str,
-        vol.Required(
-            CONF_ENABLE_LEGACY_TOOL_CALLING,
-            description={"suggested_value": options.get(CONF_ENABLE_LEGACY_TOOL_CALLING)},
-            default=DEFAULT_ENABLE_LEGACY_TOOL_CALLING
-        ): bool,
-        vol.Required(
-            CONF_TOOL_RESPONSE_AS_STRING,
-            description={"suggested_value": options.get(CONF_TOOL_RESPONSE_AS_STRING)},
-            default=DEFAULT_TOOL_RESPONSE_AS_STRING
-        ): bool,
         vol.Optional(
             CONF_TAVILY_API_KEY,
             description={"suggested_value": options.get(CONF_TAVILY_API_KEY, "")},
             default=options.get(CONF_TAVILY_API_KEY, ""),
         ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
+        vol.Required(
+            CONF_THINKING_PREFIX,
+            description={"suggested_value": options.get(CONF_THINKING_PREFIX, DEFAULT_THINKING_PREFIX)},
+            default=DEFAULT_THINKING_PREFIX,
+        ): str,
+        vol.Required(
+            CONF_THINKING_SUFFIX,
+            description={"suggested_value": options.get(CONF_THINKING_SUFFIX, DEFAULT_THINKING_SUFFIX)},
+            default=DEFAULT_THINKING_SUFFIX,
+        ): str,
+        vol.Required(
+            CONF_TOOL_CALL_PREFIX,
+            description={"suggested_value": options.get(CONF_TOOL_CALL_PREFIX, DEFAULT_TOOL_CALL_PREFIX)},
+            default=DEFAULT_TOOL_CALL_PREFIX,
+        ): str,
+        vol.Required(
+            CONF_TOOL_CALL_SUFFIX,
+            description={"suggested_value": options.get(CONF_TOOL_CALL_SUFFIX, DEFAULT_TOOL_CALL_SUFFIX)},
+            default=DEFAULT_TOOL_CALL_SUFFIX,
+        ): str,
+        vol.Required(
+            CONF_ENABLE_LEGACY_TOOL_CALLING,
+            description={"suggested_value": options.get(CONF_ENABLE_LEGACY_TOOL_CALLING, DEFAULT_ENABLE_LEGACY_TOOL_CALLING)},
+            default=DEFAULT_ENABLE_LEGACY_TOOL_CALLING
+        ): bool,
+        vol.Required(
+            CONF_TOOL_RESPONSE_AS_STRING,
+            description={"suggested_value": options.get(CONF_TOOL_RESPONSE_AS_STRING, DEFAULT_TOOL_RESPONSE_AS_STRING)},
+            default=DEFAULT_TOOL_RESPONSE_AS_STRING
+        ): bool,
     }
 
+
+
     if subentry_type == ai_task.DOMAIN:
-        result.update({
+        advanced_result.update({
             vol.Optional(
                 CONF_PROMPT,
                 description={"suggested_value": options.get(CONF_PROMPT, DEFAULT_AI_TASK_PROMPT)},
                 default=options.get(CONF_PROMPT, DEFAULT_AI_TASK_PROMPT),
             ): TemplateSelector(),
+        })
+        advanced_result.update({
             vol.Required(
                 CONF_AI_TASK_EXTRACTION_METHOD,
                 description={"suggested_value": options.get(CONF_AI_TASK_EXTRACTION_METHOD, DEFAULT_AI_TASK_EXTRACTION_METHOD)},
@@ -704,12 +717,24 @@ def local_llama_config_option_schema(
             )
             for api in llm.async_get_apis(hass)
         ]
-        result.update({
+        advanced_result.update({
             vol.Optional(
                 CONF_PROMPT,
                 description={"suggested_value": options.get(CONF_PROMPT, default_prompt)},
                 default=options.get(CONF_PROMPT, default_prompt),
             ): TemplateSelector(),
+            vol.Optional(
+                CONF_LLM_HASS_API,
+                description={"suggested_value": options.get(CONF_LLM_HASS_API)},
+                default=None,
+            ): SelectSelector(SelectSelectorConfig(options=apis, multiple=True)),
+            vol.Optional(
+                CONF_REMEMBER_CONVERSATION,
+                description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION, DEFAULT_REMEMBER_CONVERSATION)},
+                default=options.get(CONF_REMEMBER_CONVERSATION, DEFAULT_REMEMBER_CONVERSATION),
+            ): BooleanSelector(BooleanSelectorConfig()),
+        })
+        advanced_result.update({
             vol.Required(
                 CONF_USE_IN_CONTEXT_LEARNING_EXAMPLES,
                 description={"suggested_value": options.get(CONF_USE_IN_CONTEXT_LEARNING_EXAMPLES)},
@@ -731,19 +756,9 @@ def local_llama_config_option_schema(
                 default=DEFAULT_EXTRA_ATTRIBUTES_TO_EXPOSE,
             ): TextSelector(TextSelectorConfig(multiple=True)),
             vol.Optional(
-                CONF_LLM_HASS_API,
-                description={"suggested_value": options.get(CONF_LLM_HASS_API)},
-                default=None,
-            ): SelectSelector(SelectSelectorConfig(options=apis, multiple=True)),
-            vol.Optional(
                 CONF_REFRESH_SYSTEM_PROMPT,
                 description={"suggested_value": options.get(CONF_REFRESH_SYSTEM_PROMPT, DEFAULT_REFRESH_SYSTEM_PROMPT)},
                 default=options.get(CONF_REFRESH_SYSTEM_PROMPT, DEFAULT_REFRESH_SYSTEM_PROMPT),
-            ): BooleanSelector(BooleanSelectorConfig()),
-            vol.Optional(
-                CONF_REMEMBER_CONVERSATION,
-                description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION, DEFAULT_REMEMBER_CONVERSATION)},
-                default=options.get(CONF_REMEMBER_CONVERSATION, DEFAULT_REMEMBER_CONVERSATION),
             ): BooleanSelector(BooleanSelectorConfig()),
             vol.Optional(
                 CONF_REMEMBER_NUM_INTERACTIONS,
@@ -764,7 +779,7 @@ def local_llama_config_option_schema(
 
     if backend_type == BACKEND_TYPE_LLAMA_CPP:
         if subentry_type == conversation.DOMAIN:
-            result.update({
+            advanced_result.update({
                 vol.Required(
                     CONF_PROMPT_CACHING_ENABLED,
                     description={"suggested_value": options.get(CONF_PROMPT_CACHING_ENABLED)},
@@ -776,7 +791,7 @@ def local_llama_config_option_schema(
                     default=DEFAULT_PROMPT_CACHING_INTERVAL,
                 ): NumberSelector(NumberSelectorConfig(min=1, max=60, step=1))
             })
-        result.update({
+        advanced_result.update({
             vol.Required(
                 CONF_MAX_TOKENS,
                 description={"suggested_value": options.get(CONF_MAX_TOKENS)},
@@ -845,7 +860,7 @@ def local_llama_config_option_schema(
             ): str
         })
     elif backend_type == BACKEND_TYPE_TEXT_GEN_WEBUI:
-        result.update({
+        advanced_result.update({
             vol.Required(
                 CONF_CONTEXT_LENGTH,
                 description={"suggested_value": options.get(CONF_CONTEXT_LENGTH)},
@@ -892,7 +907,7 @@ def local_llama_config_option_schema(
             )),
         })
     elif backend_type in BACKEND_TYPE_GENERIC_OPENAI:
-        result.update({
+        advanced_result.update({
             vol.Required(
                 CONF_TOP_P,
                 description={"suggested_value": options.get(CONF_TOP_P)},
@@ -905,8 +920,12 @@ def local_llama_config_option_schema(
             ): NumberSelector(NumberSelectorConfig(min=5, max=900, step=1, unit_of_measurement=UnitOfTime.SECONDS, mode=NumberSelectorMode.BOX)),
         })
     elif backend_type in BACKEND_TYPE_GENERIC_OPENAI_RESPONSES:
-        del result[CONF_REMEMBER_NUM_INTERACTIONS]
-        result.update({
+        if CONF_REMEMBER_NUM_INTERACTIONS in result:
+             del result[CONF_REMEMBER_NUM_INTERACTIONS]
+        if CONF_REMEMBER_NUM_INTERACTIONS in advanced_result:
+             del advanced_result[CONF_REMEMBER_NUM_INTERACTIONS]
+
+        advanced_result.update({
             vol.Required(
                 CONF_REMEMBER_CONVERSATION_TIME_MINUTES,
                 description={"suggested_value": options.get(CONF_REMEMBER_CONVERSATION_TIME_MINUTES)},
@@ -929,7 +948,7 @@ def local_llama_config_option_schema(
             ): NumberSelector(NumberSelectorConfig(min=5, max=900, step=1, unit_of_measurement=UnitOfTime.SECONDS, mode=NumberSelectorMode.BOX)),
         })
     elif backend_type == BACKEND_TYPE_LLAMA_CPP_SERVER:
-        result.update({
+        advanced_result.update({
                 vol.Required(
                 CONF_MAX_TOKENS,
                 description={"suggested_value": options.get(CONF_MAX_TOKENS)},
@@ -962,7 +981,7 @@ def local_llama_config_option_schema(
             ): NumberSelector(NumberSelectorConfig(min=5, max=900, step=1, unit_of_measurement=UnitOfTime.SECONDS, mode=NumberSelectorMode.BOX)),
         })
     elif backend_type == BACKEND_TYPE_OLLAMA:
-        result.update({
+        advanced_result.update({
             vol.Required(
                 CONF_MAX_TOKENS,
                 description={"suggested_value": options.get(CONF_MAX_TOKENS)},
@@ -1005,7 +1024,7 @@ def local_llama_config_option_schema(
             ): NumberSelector(NumberSelectorConfig(min=-1, max=1440, step=1, unit_of_measurement=UnitOfTime.MINUTES, mode=NumberSelectorMode.BOX)),
         })
     elif backend_type == BACKEND_TYPE_ANTHROPIC:
-        result.update({
+        advanced_result.update({
             vol.Required(
                 CONF_MAX_TOKENS,
                 description={"suggested_value": options.get(CONF_MAX_TOKENS)},
@@ -1027,12 +1046,12 @@ def local_llama_config_option_schema(
                 default=DEFAULT_REQUEST_TIMEOUT,
             ): NumberSelector(NumberSelectorConfig(min=5, max=900, step=1, unit_of_measurement=UnitOfTime.SECONDS, mode=NumberSelectorMode.BOX)),
         })
-
-    # sort the options
     global_order = [
         # general
+        CONF_SHOW_ADVANCED,
         CONF_LLM_HASS_API,
         CONF_PROMPT,
+        CONF_TAVILY_API_KEY,
         CONF_AI_TASK_EXTRACTION_METHOD,
         CONF_AI_TASK_RETRIES,
         CONF_CONTEXT_LENGTH,
@@ -1077,13 +1096,16 @@ def local_llama_config_option_schema(
         CONF_OLLAMA_JSON_MODE,
     ]
 
-    result = { k: v for k, v in sorted(result.items(), key=lambda item: global_order.index(item[0]) if item[0] in global_order else 9999) }
+    if show_advanced:
+        result.update(advanced_result)
+
+    result = { k: v for k, v in sorted(result.items(), key=lambda item: global_order.index(item[0].schema if hasattr(item[0], "schema") else item[0]) if (item[0].schema if hasattr(item[0], "schema") else item[0]) in global_order else 9999) }
 
     return result
 
 
-class LocalLLMSubentryFlowHandler(ConfigSubentryFlow):
-    """Flow for managing Local LLM subentries."""
+class LMStudioSubentryFlowHandler(ConfigSubentryFlow):
+    """Flow for managing LM Studio subentries."""
 
     def __init__(self) -> None:
         """Initialize the subentry flow."""
@@ -1100,9 +1122,9 @@ class LocalLLMSubentryFlowHandler(ConfigSubentryFlow):
         return self.source == "user"
 
     @property
-    def _client(self) -> LocalLLMClient:
-        """Return the Ollama client."""
-        entry: LocalLLMConfigEntry = self._get_entry()
+    def _client(self) -> LMStudioClient:
+        """Return the client."""
+        entry: LMStudioConfigEntry = self._get_entry()
         return entry.runtime_data
 
     async def async_step_pick_model(
@@ -1252,18 +1274,22 @@ class LocalLLMSubentryFlowHandler(ConfigSubentryFlow):
 
             # Build prompt template using the selected language
             selected_default_options[CONF_PROMPT] = build_prompt_template(
-                selected_language, str(selected_default_options.get(CONF_PROMPT, DEFAULT_PROMPT))
+                selected_language, selected_default_options.get(CONF_PROMPT, DEFAULT_PROMPT)
             )
             
             self.model_config = {**selected_default_options, **self.model_config}
 
+        previous_show_advanced = self.model_config.get(CONF_SHOW_ADVANCED, False)
+        show_advanced = user_input.get(CONF_SHOW_ADVANCED, previous_show_advanced) if user_input else previous_show_advanced
+
         schema = vol.Schema(
-            local_llama_config_option_schema(
+            lm_studio_config_option_schema(
                 self.hass,
                 entry.options.get(CONF_SELECTED_LANGUAGE, "en"),
                 self.model_config,
                 backend_type,
                 self._subentry_type,
+                show_advanced=show_advanced,
             )
         )
 
@@ -1301,6 +1327,9 @@ class LocalLLMSubentryFlowHandler(ConfigSubentryFlow):
                     # validate input
                     schema(user_input)
                     self.model_config.update(user_input)
+
+                    if user_input.get(CONF_SHOW_ADVANCED) != previous_show_advanced:
+                        return await self.async_step_model_parameters()
                     
                     return await self.async_step_finish()
                 except Exception:

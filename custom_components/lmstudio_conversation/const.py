@@ -1,9 +1,9 @@
-"""Constants for the Local LLM Conversation integration."""
+"""Constants for the LM Studio Conversation integration."""
 import types, os
 from typing import Any
 
-DOMAIN = "llama_conversation"
-HOME_LLM_API_ID = "home-llm-service-api"
+DOMAIN = "lmstudio_conversation"
+LM_STUDIO_API_ID = "lmstudio-service-api"
 SERVICE_TOOL_NAME = "HassCallService"
 SERVICE_TOOL_ALLOWED_SERVICES = ["turn_on", "turn_off", "toggle", "press", "increase_speed", "decrease_speed", "open_cover", "close_cover", "stop_cover", "lock", "unlock", "start", "stop", "return_to_base", "pause", "cancel", "add_item", "set_temperature", "set_humidity", "set_fan_mode", "set_hvac_mode", "set_preset_mode"]
 SERVICE_TOOL_ALLOWED_DOMAINS = ["light", "switch", "button", "fan", "cover", "lock", "media_player", "climate", "vacuum", "todo", "timer", "script"]
@@ -130,6 +130,7 @@ CONF_DOWNLOADED_MODEL_QUANTIZATION_OPTIONS = [
 ]
 DEFAULT_DOWNLOADED_MODEL_QUANTIZATION = "Q4_K_M"
 CONF_DOWNLOADED_MODEL_FILE = "downloaded_model_file"
+CONF_SHOW_ADVANCED = "show_advanced"
 DEFAULT_DOWNLOADED_MODEL_FILE = ""
 DEFAULT_PORT = "5000"
 DEFAULT_SSL = False
@@ -357,5 +358,5 @@ def option_overrides(backend_type: str) -> dict[str, Any]:
         },
     }
 
-INTEGRATION_VERSION = "0.4.7"
+INTEGRATION_VERSION = "0.4.8"
 EMBEDDED_LLAMA_CPP_PYTHON_VERSION = "0.3.16+b6153"

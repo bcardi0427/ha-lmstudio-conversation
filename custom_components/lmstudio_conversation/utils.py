@@ -259,7 +259,7 @@ def install_llama_cpp_python(config_dir: str, force_reinstall: bool = False, spe
     if not installed_wrong_version:
         _LOGGER.error(
             "Error installing llama-cpp-python. Could not install the binary wheels from GitHub." + \
-            "Please manually build or download the wheels and place them in the `/config/custom_components/llama_conversation` directory." + \
+            "Please manually build or download the wheels and place them in the `/config/custom_components/lmstudio_conversation` directory." + \
             "Make sure that you download the correct .whl file for your platform and python version from the GitHub releases page."
         )
         return False
@@ -289,7 +289,7 @@ def get_oai_formatted_tools(llm_api: llm.APIInstance, domains: list[str]) -> Lis
                     "description": f"Call the Home Assistant service '{tool['name']}'",
                     "parameters": convert_to_openapi(tool["arguments"], custom_serializer=llm_api.custom_serializer)
                 }
-            } for tool in get_home_llm_tools(llm_api, domains) ])
+            } for tool in get_lm_studio_tools(llm_api, domains) ])
         else:
             result.append({
                 "type": "function",
@@ -376,7 +376,7 @@ def get_oai_formatted_messages(
 
     return messages
 
-def get_home_llm_tools(llm_api: llm.APIInstance, domains: list[str]) -> List[Dict[str, Any]]:
+def get_lm_studio_tools(llm_api: llm.APIInstance, domains: list[str]) -> List[Dict[str, Any]]:
     service_dict = llm_api.api.hass.services.async_services()
     all_services = []
     scripts_added = False
@@ -449,7 +449,7 @@ def parse_raw_tool_call(raw_block: str | dict, agent_id: str) -> tuple[llm.ToolI
         base_schema_to_validate(parsed_tool_call)
     except vol.Error as ex:
         try:
-            home_llm_schema_to_validate = vol.Schema({
+            lm_studio_schema_to_validate = vol.Schema({
                 vol.Required('service'): str,
                 vol.Required('target_device'): str,
                 vol.Optional('rgb_color'): str,
@@ -462,7 +462,7 @@ def parse_raw_tool_call(raw_block: str | dict, agent_id: str) -> tuple[llm.ToolI
                 vol.Optional('duration'): str,
                 vol.Optional('item'): str,
             })
-            home_llm_schema_to_validate(parsed_tool_call)
+            lm_studio_schema_to_validate(parsed_tool_call)
             is_services_tool_call = True
         except vol.Error as ex:
             _LOGGER.info(f"LLM produced an improperly formatted response: {repr(ex)}")

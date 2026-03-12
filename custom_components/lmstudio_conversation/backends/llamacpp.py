@@ -17,8 +17,8 @@ from homeassistant.exceptions import ConfigEntryError, HomeAssistantError
 from homeassistant.helpers import llm
 from homeassistant.helpers.event import async_track_state_change, async_call_later
 
-from custom_components.llama_conversation.utils import install_llama_cpp_python, validate_llama_cpp_python_installation, get_oai_formatted_messages, get_oai_formatted_tools
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.utils import install_llama_cpp_python, validate_llama_cpp_python_installation, get_oai_formatted_messages, get_oai_formatted_tools
+from custom_components.lmstudio_conversation.const import (
     CONF_ENABLE_LEGACY_TOOL_CALLING,
     CONF_TOOL_RESPONSE_AS_STRING,
     CONF_INSTALLED_LLAMACPP_VERSION,
@@ -64,7 +64,7 @@ from custom_components.llama_conversation.const import (
     DOMAIN,
     CONF_RESPONSE_JSON_SCHEMA,
 )
-from custom_components.llama_conversation.entity import LocalLLMClient, TextGenerationResult
+from custom_components.lmstudio_conversation.entity import LMStudioClient, TextGenerationResult
 
 # make type checking work for llama-cpp-python without importing it directly at runtime
 from typing import TYPE_CHECKING
@@ -98,7 +98,7 @@ def snapshot_settings(options: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-class LlamaCppClient(LocalLLMClient):
+class LlamaCppClient(LMStudioClient):
     llama_cpp_module: ModuleType | None
 
     models: dict[str, LlamaType]
@@ -218,7 +218,7 @@ class LlamaCppClient(LocalLLMClient):
             self.grammars[model_name] = None
 
     def _update_options(self, entity_options: dict[str, Any]):
-        LocalLLMClient._update_options(self, entity_options)
+        LMStudioClient._update_options(self, entity_options)
 
         loaded_options = self.loaded_model_settings.get(entity_options.get(CONF_CHAT_MODEL, ""), None)
 
@@ -287,7 +287,7 @@ class LlamaCppClient(LocalLLMClient):
 
     def _async_get_exposed_entities(self) -> dict[str, dict[str, str]]:
         """Takes the super class function results and sorts the entities with the recently updated at the end"""
-        entities = LocalLLMClient._async_get_exposed_entities(self)
+        entities = LMStudioClient._async_get_exposed_entities(self)
 
         entity_order: dict[str, Optional[float]] = { name: None for name in entities.keys() }
         entity_order.update(self.last_updated_entities)

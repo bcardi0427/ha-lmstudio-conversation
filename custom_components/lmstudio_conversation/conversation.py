@@ -13,9 +13,9 @@ from homeassistant.exceptions import TemplateError, HomeAssistantError
 from homeassistant.helpers import chat_session, intent, llm
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from custom_components.llama_conversation.utils import MalformedToolCallException
+from custom_components.lmstudio_conversation.utils import MalformedToolCallException
 
-from .entity import LocalLLMEntity, LocalLLMClient, LocalLLMConfigEntry
+from .entity import LMStudioEntity, LMStudioClient, LMStudioConfigEntry
 from .const import (
     CONF_CHAT_MODEL,
     CONF_PROMPT,
@@ -33,8 +33,8 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> bool:
-    """Set up Local LLM Conversation from a config entry."""
+async def async_setup_entry(hass: HomeAssistant, entry: LMStudioConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback) -> bool:
+    """Set up LM Studio Conversation from a config entry."""
 
     for subentry in entry.subentries.values():
         if subentry.subentry_type != conversation.DOMAIN:
@@ -45,7 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry, asy
             continue
 
         # create one agent entity per conversation subentry
-        agent_entity = LocalLLMAgent(hass, entry, subentry, entry.runtime_data)
+        agent_entity = LMStudioAgent(hass, entry, subentry, entry.runtime_data)
 
         # make sure model is loaded
         await entry.runtime_data._async_load_model(dict(subentry.data))
@@ -55,10 +55,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry, asy
 
     return True
 
-class LocalLLMAgent(ConversationEntity, AbstractConversationAgent, LocalLLMEntity):
-    """Base Local LLM conversation agent."""
+class LMStudioAgent(ConversationEntity, AbstractConversationAgent, LMStudioEntity):
+    """Base LM Studio conversation agent."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, subentry: ConfigSubentry, client: LocalLLMClient) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, subentry: ConfigSubentry, client: LMStudioClient) -> None:
         super().__init__(hass, entry, subentry, client)
 
         if subentry.data.get(CONF_LLM_HASS_API):

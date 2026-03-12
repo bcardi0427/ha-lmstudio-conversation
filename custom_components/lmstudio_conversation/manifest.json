@@ -1,12 +1,12 @@
 {
-  "domain": "llama_conversation",
-  "name": "ha-lmstudio-conversation",
-  "version": "0.4.7",
-  "codeowners": ["@acon96"],
+  "domain": "lmstudio_conversation",
+  "name": "LM Studio Conversation",
+  "version": "0.4.8",
+  "codeowners": ["@bcardi0427"],
   "config_flow": true,
   "dependencies": ["conversation", "ai_task"],
   "after_dependencies": ["assist_pipeline", "intent"],
-  "documentation": "https://github.com/acon96/home-llm",
+  "documentation": "https://github.com/bcardi0427/ha-lmstudio-conversation",
   "integration_type": "service",
   "iot_class": "local_polling",
   "requirements": [

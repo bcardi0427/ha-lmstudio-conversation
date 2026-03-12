@@ -15,7 +15,7 @@ from homeassistant.helpers import llm
 
 from voluptuous_openapi import convert as convert_to_openapi
 
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.const import (
     CONF_CHAT_MODEL,
     CONF_MAX_TOKENS,
     CONF_TEMPERATURE,
@@ -37,8 +37,8 @@ from custom_components.llama_conversation.const import (
     DEFAULT_API_PATH,
 )
 
-from custom_components.llama_conversation.entity import LocalLLMClient, TextGenerationResult
-from custom_components.llama_conversation.utils import get_file_contents_base64
+from custom_components.lmstudio_conversation.entity import LMStudioClient, TextGenerationResult
+from custom_components.lmstudio_conversation.utils import get_file_contents_base64
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -150,7 +150,7 @@ def _convert_tools_to_anthropic_format(
     return tools
 
 
-class AnthropicAPIClient(LocalLLMClient):
+class AnthropicAPIClient(LMStudioClient):
     """Implements the Anthropic-compatible Messages API backend."""
 
     api_key: str

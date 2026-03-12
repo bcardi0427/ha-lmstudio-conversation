@@ -1,4 +1,4 @@
-"""The Local LLM Conversation integration."""
+"""The LM Studio Conversation integration."""
 from __future__ import annotations
 
 import logging
@@ -19,7 +19,7 @@ import voluptuous as vol
 from .const import (
     ALLOWED_SERVICE_CALL_ARGUMENTS,
     DOMAIN,
-    HOME_LLM_API_ID,
+    LM_STUDIO_API_ID,
     SERVICE_TOOL_NAME,
     SERVICE_TOOL_ALLOWED_SERVICES,
     SERVICE_TOOL_ALLOWED_DOMAINS,
@@ -50,7 +50,7 @@ from .const import (
     BACKEND_TYPE_LLAMA_EXISTING_OLD,
     BACKEND_TYPE_LLAMA_HF_OLD,
 )
-from .entity import LocalLLMClient, LocalLLMConfigEntry
+from .entity import LMStudioClient, LMStudioConfigEntry
 from .backends.llamacpp import LlamaCppClient
 from .backends.generic_openai import GenericOpenAIAPIClient, GenericOpenAIResponsesAPIClient
 from .backends.tailored_openai import TextGenerationWebuiClient, LlamaCppServerClient
@@ -64,7 +64,7 @@ CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 PLATFORMS = (Platform.CONVERSATION,  Platform.AI_TASK)
 
-BACKEND_TO_CLS: dict[str, type[LocalLLMClient]] = {
+BACKEND_TO_CLS: dict[str, type[LMStudioClient]] = {
     BACKEND_TYPE_LLAMA_CPP: LlamaCppClient,
     BACKEND_TYPE_GENERIC_OPENAI: GenericOpenAIAPIClient,
     BACKEND_TYPE_GENERIC_OPENAI_RESPONSES: GenericOpenAIResponsesAPIClient,
@@ -74,16 +74,16 @@ BACKEND_TO_CLS: dict[str, type[LocalLLMClient]] = {
     BACKEND_TYPE_ANTHROPIC: AnthropicAPIClient,
 }
 
-async def async_setup_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: LMStudioConfigEntry) -> bool:
 
     # make sure the API is registered
-    if not any([x.id == HOME_LLM_API_ID for x in llm.async_get_apis(hass)]):
-        llm.async_register_api(hass, HomeLLMAPI(hass))
+    if not any([x.id == LM_STUDIO_API_ID for x in llm.async_get_apis(hass)]):
+        llm.async_register_api(hass, LMStudioAPI(hass))
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = entry
 
     def create_client(backend_type):
-        _LOGGER.debug("Creating Local LLM client of type %s", backend_type)
+        _LOGGER.debug("Creating LM Studio client of type %s", backend_type)
         # Merge entry.data and entry.options - data has connection info, options has model settings
         client_options = {**dict(entry.data), **dict(entry.options)}
         return BACKEND_TO_CLS[backend_type](hass, client_options)
@@ -100,10 +100,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry) -> 
     return True
 
 
-async def _async_update_listener(hass: HomeAssistant, entry: LocalLLMConfigEntry) -> None:
+async def _async_update_listener(hass: HomeAssistant, entry: LMStudioConfigEntry) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
 
-async def async_unload_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: LMStudioConfigEntry) -> bool:
     """Unload the integration."""
     if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         return False
@@ -120,7 +120,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: LocalLLMConfigEntry) ->
     return True
 
 
-async def async_migrate_entry(hass: HomeAssistant, config_entry: LocalLLMConfigEntry):
+async def async_migrate_entry(hass: HomeAssistant, config_entry: LMStudioConfigEntry):
     """Migrate old entry."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
@@ -330,17 +330,17 @@ class HassServiceTool(llm.Tool):
 
         return { "result": "success" }
 
-class HomeLLMAPI(llm.API):
+class LMStudioAPI(llm.API):
     """
     An API that allows calling Home Assistant services to maintain compatibility
-    with the older (v3 and older) Home LLM models
+    with the older (v3 and older) LM Studio models
     """
 
     def __init__(self, hass: HomeAssistant) -> None:
         """Init the class."""
         super().__init__(
             hass=hass,
-            id=HOME_LLM_API_ID,
+            id=LM_STUDIO_API_ID,
             name="Home Assistant Services",
         )
 

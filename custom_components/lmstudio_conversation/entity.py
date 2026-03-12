@@ -1,4 +1,4 @@
-"""Defines the base logic for exposing a local LLM as an entity."""
+"""Defines the base logic for exposing a LM Studio model as an entity."""
 from __future__ import annotations
 
 import csv
@@ -46,7 +46,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-type LocalLLMConfigEntry = ConfigEntry[LocalLLMClient]
+type LMStudioConfigEntry = ConfigEntry[LMStudioClient]
 
 
 @dataclass(kw_only=True)
@@ -58,8 +58,8 @@ class TextGenerationResult:
     raise_error: bool = False
     error_msg: Optional[str] = None
 
-class LocalLLMClient:
-    """Base Local LLM conversation agent."""
+class LMStudioClient:
+    """Base LM Studio conversation agent."""
 
     hass: HomeAssistant
     in_context_examples: Optional[List[Dict[str, str]]]
@@ -600,16 +600,16 @@ class LocalLLMClient:
         )
 
 
-class LocalLLMEntity(entity.Entity):
-    """Base LLM Entity"""
+class LMStudioEntity(entity.Entity):
+    """Base LM Studio Entity"""
     hass: HomeAssistant
-    client: LocalLLMClient
+    client: LMStudioClient
     entry_id: str
     in_context_examples: Optional[List[Dict[str, str]]]
 
     _attr_has_entity_name = True
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, subentry: ConfigSubentry, client: LocalLLMClient) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, subentry: ConfigSubentry, client: LMStudioClient) -> None:
         """Initialize the agent."""
         self._attr_name = subentry.title
         self._attr_unique_id = subentry.subentry_id
@@ -628,7 +628,7 @@ class LocalLLMEntity(entity.Entity):
         # create update handler
         self.async_on_remove(entry.add_update_listener(self._async_update_options))
 
-    async def _async_update_options(self, hass: HomeAssistant, config_entry: LocalLLMConfigEntry):
+    async def _async_update_options(self, hass: HomeAssistant, config_entry: LMStudioConfigEntry):
         for subentry in config_entry.subentries.values():
             # handle subentry updates, but only invoke for this entity
             if subentry.subentry_id == self.subentry_id:

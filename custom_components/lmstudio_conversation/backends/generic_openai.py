@@ -16,8 +16,8 @@ from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SSL
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import llm
 
-from custom_components.llama_conversation.utils import format_url, get_oai_formatted_messages, get_oai_formatted_tools, parse_raw_tool_call
-from custom_components.llama_conversation.const import (
+from custom_components.lmstudio_conversation.utils import format_url, get_oai_formatted_messages, get_oai_formatted_tools, parse_raw_tool_call
+from custom_components.lmstudio_conversation.const import (
     CONF_CHAT_MODEL,
     CONF_MAX_TOKENS,
     CONF_TEMPERATURE,
@@ -41,11 +41,11 @@ from custom_components.llama_conversation.const import (
     DEFAULT_TOOL_RESPONSE_AS_STRING,
     RECOMMENDED_CHAT_MODELS,
 )
-from custom_components.llama_conversation.entity import TextGenerationResult, LocalLLMClient
+from custom_components.lmstudio_conversation.entity import TextGenerationResult, LMStudioClient
 
 _LOGGER = logging.getLogger(__name__)
 
-class GenericOpenAIAPIClient(LocalLLMClient):
+class GenericOpenAIAPIClient(LMStudioClient):
     """Implements the OpenAPI-compatible text completion and chat completion API backends."""
 
     api_host: str
@@ -248,7 +248,7 @@ class GenericOpenAIAPIClient(LocalLLMClient):
         return response_text, tool_calls
 
 
-class GenericOpenAIResponsesAPIClient(LocalLLMClient):
+class GenericOpenAIResponsesAPIClient(LMStudioClient):
     """Implements the OpenAPI-compatible Responses API backend."""
 
     api_host: str

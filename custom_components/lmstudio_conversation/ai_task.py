@@ -1,4 +1,4 @@
-"""AI Task integration for Local LLMs."""
+"""AI Task integration for LM Studio."""
 from __future__ import annotations
 
 from json import JSONDecodeError
@@ -17,7 +17,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util.json import json_loads
 
-from .entity import LocalLLMEntity, LocalLLMClient
+from .entity import LMStudioEntity, LMStudioClient
 from .const import (
     CONF_PROMPT,
     CONF_RESPONSE_JSON_SCHEMA,
@@ -34,7 +34,7 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: ConfigEntry[LocalLLMClient],
+    config_entry: ConfigEntry[LMStudioClient],
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up AI Task entities."""
@@ -43,7 +43,7 @@ async def async_setup_entry(
             continue
 
         # create one entity per subentry
-        ai_task_entity = LocalLLMTaskEntity(hass, config_entry, subentry, config_entry.runtime_data)
+        ai_task_entity = LMStudioTaskEntity(hass, config_entry, subentry, config_entry.runtime_data)
 
         # make sure model is loaded
         await config_entry.runtime_data._async_load_model(dict(subentry.data))
@@ -94,9 +94,9 @@ class SubmitResponseAPI(llm.API):
         )
 
 
-class LocalLLMTaskEntity(
+class LMStudioTaskEntity(
     ai_task.AITaskEntity,
-    LocalLLMEntity,
+    LMStudioEntity,
 ):
     """AI Task entity."""
 

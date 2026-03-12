@@ -169,7 +169,8 @@
                         "tool_call_suffix": "Tool Call Suffix",
                         "enable_legacy_tool_calling": "Enable Legacy Tool Calling",
                         "tool_response_as_string": "Tool Response as String",
-                        "max_tool_call_iterations": "Maximum Tool Call Attempts"
+                        "max_tool_call_iterations": "Maximum Tool Call Attempts",
+                        "show_advanced": "Show Advanced Options"
                     },
                     "data_description": {
                         "llm_hass_api": "Select 'Assist' if you want the model to be able to control devices. If you are using the Home-LLM (v1-3) model then select 'Home Assistant Services'",
@@ -361,7 +362,7 @@
                     "reinstall_llama_cpp": "Reinstall Llama.cpp",
                     "installed_llama_cpp_version": "Version to (re)install"
                 },
-                "description": "__If you are experiencing issues with Llama.cpp__, you can force a reinstall of the package here. This will attempt to re-install or upgrade the llama-cpp-python package from GitHub *or* a local wheel file placed in the `/config/custom_components/llama_conversation/` directory.",
+                "description": "__If you are experiencing issues with Llama.cpp__, you can force a reinstall of the package here. This will attempt to re-install or upgrade the llama-cpp-python package from GitHub *or* a local wheel file placed in the `/config/custom_components/lmstudio_conversation/` directory.",
                 "title": "Reinstall Llama.cpp"
             }
         },
