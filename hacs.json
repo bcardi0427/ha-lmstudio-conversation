@@ -1,6 +1,7 @@
 {
-    "name": "ha-lmstudio-conversation",    
+    "name": "ha-lmstudio-conversation",
     "homeassistant": "2025.7.0",
     "content_in_root": false,
     "render_readme": true
-} 
+}
+
