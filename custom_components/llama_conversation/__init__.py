@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import os
 import shutil
+import aiohttp
 from typing import Final
 
 from homeassistant.config_entries import ConfigEntry, ConfigSubentry
@@ -26,6 +27,7 @@ from .const import (
     CONF_INSTALLED_LLAMACPP_VERSION,
     CONF_SELECTED_LANGUAGE,
     CONF_API_KEY,
+    CONF_TAVILY_API_KEY,
     CONF_API_PATH,
     CONF_CHAT_MODEL, CONF_DOWNLOADED_MODEL_QUANTIZATION, CONF_DOWNLOADED_MODEL_FILE, CONF_REQUEST_TIMEOUT, CONF_MAX_TOOL_CALL_ITERATIONS,
     CONF_REFRESH_SYSTEM_PROMPT, CONF_REMEMBER_CONVERSATION, CONF_REMEMBER_NUM_INTERACTIONS, CONF_REMEMBER_CONVERSATION_TIME_MINUTES,
@@ -216,6 +218,60 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: LocalLLMConfigE
 
     return True
 
+class WebSearchTool(llm.Tool):
+    """Tool to search the web for information."""
+
+    name: Final[str] = "web_search"
+    description: Final[str] = "Search the web for current events, facts, news, and information."
+
+    parameters = vol.Schema({
+        vol.Required('query'): str,
+    })
+
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+
+    async def async_call(
+        self, hass: HomeAssistant, tool_input: llm.ToolInput, llm_context: llm.LLMContext
+    ) -> JsonObjectType:
+        """Call the tool."""
+        query = tool_input.tool_args["query"]
+        
+        if not self.api_key:
+            return {"result": "Tavily API key is not configured."}
+            
+        try:
+            url = "https://api.tavily.com/search"
+            payload = {
+                "api_key": self.api_key,
+                "query": query,
+                "search_depth": "basic",
+                "max_results": 3,
+                "include_answer": True
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+                    
+                    if "answer" in data and data["answer"]:
+                        return {"result": data["answer"]}
+                    
+                    results = data.get("results", [])
+                    if not results:
+                        return {"result": "No results found on the web."}
+                    
+                    formatted = []
+                    for r in results:
+                        formatted.append(f"Title: {r.get('title', '')}\nSummary: {r.get('content', '')}")
+                    
+                    return {"result": "\n\n".join(formatted)}
+                    
+        except Exception as e:
+            _LOGGER.exception("Web search failed")
+            return {"result": f"Search failed: {str(e)}"}
+
 class HassServiceTool(llm.Tool):
     """Tool to get the current time."""
 
@@ -290,9 +346,20 @@ class HomeLLMAPI(llm.API):
 
     async def async_get_api_instance(self, llm_context: llm.LLMContext) -> llm.APIInstance:
         """Return the instance of the API."""
+        api_keys = [
+            entry.options.get(CONF_TAVILY_API_KEY, "")
+            for entry in self.hass.config_entries.async_entries(DOMAIN)
+            if entry.options.get(CONF_TAVILY_API_KEY)
+        ]
+        api_key = api_keys[0] if api_keys else ""
+
+        tools = [HassServiceTool()]
+        if api_key:
+            tools.append(WebSearchTool(api_key))
+
         return llm.APIInstance(
             api=self,
-            api_prompt="Call services in Home Assistant by passing the service name and the device to control. Designed for Home-LLM Models (v1-v3)",
+            api_prompt="Call services in Home Assistant by passing the service name and the device to control. If the user asks for information not related to the smart home, use the web_search tool.",
             llm_context=llm_context,
-            tools=[HassServiceTool()],
+            tools=tools,
         )

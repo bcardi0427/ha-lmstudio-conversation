@@ -162,6 +162,7 @@ CONF_NUM_IN_CONTEXT_EXAMPLES = "num_in_context_examples"
 DEFAULT_NUM_IN_CONTEXT_EXAMPLES = 4
 CONF_TEXT_GEN_WEBUI_PRESET = "text_generation_webui_preset"
 CONF_API_KEY = "openai_api_key"
+CONF_TAVILY_API_KEY = "tavily_api_key"
 CONF_TEXT_GEN_WEBUI_ADMIN_KEY = "text_generation_webui_admin_key"
 CONF_REFRESH_SYSTEM_PROMPT = "refresh_prompt_per_turn"
 DEFAULT_REFRESH_SYSTEM_PROMPT = True

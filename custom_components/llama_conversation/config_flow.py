@@ -87,6 +87,7 @@ from .const import (
     CONF_IN_CONTEXT_EXAMPLES_FILE,
     CONF_NUM_IN_CONTEXT_EXAMPLES,
     CONF_API_KEY,
+    CONF_TAVILY_API_KEY,
     CONF_TEXT_GEN_WEBUI_ADMIN_KEY,
     CONF_TEXT_GEN_WEBUI_CHAT_MODE,
     CONF_OLLAMA_KEEP_ALIVE_MIN,
@@ -662,6 +663,11 @@ def local_llama_config_option_schema(
             description={"suggested_value": options.get(CONF_TOOL_RESPONSE_AS_STRING)},
             default=DEFAULT_TOOL_RESPONSE_AS_STRING
         ): bool,
+        vol.Optional(
+            CONF_TAVILY_API_KEY,
+            description={"suggested_value": options.get(CONF_TAVILY_API_KEY, "")},
+            default=options.get(CONF_TAVILY_API_KEY, ""),
+        ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
     }
 
     if subentry_type == ai_task.DOMAIN:
